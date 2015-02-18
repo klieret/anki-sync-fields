@@ -24,6 +24,10 @@ class readingSync(object):
 		# to the deck KANJI, then the name of the deck is KANJI::rtk2
 		self.sourceDecks=["KANJI::rtk2","KANJI::readings"]
 		self.targetDecks=["VOCAB::vocabular_main","VOCAB::vocab_new"]
+		# For the automated completion of fields checks 
+		# for the card type instead:
+		self.sourceCards=['readings']
+		self.targetCards='myJapanese_example_sentences'[]
 		# Compare the following fields from source and target
 		self.sourceMatch='Expression'
 		self.targetMatch='Expression'
@@ -43,18 +47,18 @@ class readingSync(object):
 		# loop through sourceDeck and build self.data
 		nids=[]
 		self.data={}
-		mw.progress.start()
 		for deck in self.sourceDecks:
 			nids+=mw.col.findCards("deck:%s" % deck)
 		for nid in nids:
 			card=mw.col.getCard(nid)
 			note = card.note()
-			for kanji in getKanjis(note[self.sourceMatch]):
+			self.dataNote(note)
+
+	def dataNote(self,note):
+		for kanji in getKanjis(note[self.sourceMatch]):
 				self.data[kanji]={}
 				for sourceField in self.sourceFields:
 					self.data[kanji][sourceField]=note[sourceField]
-		mw.progress.finish()
-		mw.reset()
 
 	def joinSourceFields(self,subDict):
 		""" Takes a subset of self.data and transforms it to 
@@ -83,6 +87,9 @@ class readingSync(object):
 			self.syncSingleTarget(note)
 	
 	def syncSingleTarget(self,note):
+		if self.data=={}:
+			# self.data has not been initialized
+			self.buildData()
 		kanjis=getKanjis(note[self.sourceMatch])
 		subDict={}
 		for kanji in kanjis:
@@ -90,26 +97,54 @@ class readingSync(object):
 				subDict[kanji]=self.data[kanji]
 		note[self.targetField]=self.joinSourceFields(subDict)
 		note.flush() # don't forget!
+		print(note[self.targetField])
 	
-	def slowMethod(self,kanji):
-		# get note ids of relevant notes
-		nids=[]
-		for deck in self.sourceDecks:
-			# just use the standard search of anki
-			# i.e. search for deck:sourceDeck sourceMatch:kanji
-			nids+=mw.col.findCards("deck:%s %s:%s" % (deck, self.sourceMatch, kanji))
-		out=unicode("")
-		for nid in nids:
-			note=mw.col.getCard(nid).note()
-			
-			out+=note[self.sourceField1].strip()
-			if note[self.sourceField2].strip():
-				out+="Ex.: "
-				out+=note[self.sourceField2].strip()
-		return out
-	
-	
+	def onFocusLost(self,flag,note,field):
+		""" this method gets called as soon as somebody 
+		edits a field on a card, i.e. we use it to automatically update 
+		the target field accordingly. See http://ankisrs.net/docs/addons.html#hooks """
+		# first we check if this is a card
+		# we're interested in:
+		# Case 1: 	Somebody changes something in sourceDeck
+		# 			then we update self.data (but don't sync automatically)
+		# Case 2:	Somebody changes something in targetDeck
+		#			then we sync
+		# whenever a card is irrelevant, we return $flag
+		print('trigger')
+		deck=mw.col.decks.current()['name']
+		print(deck)
+		if deck in self.sourceDecks:
+			# here we react only, if one of the sourceFields
+			# from which we extract Information is changed
+			# this is enugh to handle cases of a new kanji-reading
+			# added.
+			srcFields=self.sourceFields
+			ok=False
+			for c, name in enumerate(mw.col.models.fieldNames(note.model())):
+				for f in srcFields:
+					if name == f:
+						if field==c:
+							ok=True
+			if not ok:
+				return flag
+			self.dataNote(note)
+			return True
+		elif deck in self.targetDecks:
+			print('target')
+			srcFields=self.targetMatch
+			for c, name in enumerate(mw.col.models.fieldNames(note.model())):
+				for f in srcFields:
+					if name == f:
+						src = f
+						srcIdx = c
+			if field != srcIdx:
+				return flag
+			print('sync')
+			self.syncSingleTarget(note)
+			return True
+		else:
+			return flag
 
 a=readingSync()
 addHook('browser.setupMenus',a.setupMenu)
-
+addHook('editFocusLost', a.onFocusLost)
