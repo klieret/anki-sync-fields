@@ -13,11 +13,6 @@ def getKanjis(string):
 		return re.findall(ur'[\u4e00-\u9fbf]',string)
 
 class readingSync(object):
-	# There are 2 methods for syncing the readings
-	# 1. Loop through the deck with the readings and 
-	#    sync everything
-	# 2. Look for the kanjis of one new card and sync this one only
-	#    (slow in comparison with 1, but faster if only applied to one card)
 	def __init__(self):
 		# We sync from sourceDecks to targetDecks
 		# Note that if you have sutargetDecks, e.g. a subdeck rtk2
@@ -27,7 +22,7 @@ class readingSync(object):
 		# For the automated completion of fields checks 
 		# for the card type instead:
 		self.sourceCards=['readings']
-		self.targetCards='myJapanese_example_sentences'[]
+		self.targetCards=['myJapanese_example_sentences']
 		# Compare the following fields from source and target
 		self.sourceMatch='Expression'
 		self.targetMatch='Expression'
@@ -36,6 +31,20 @@ class readingSync(object):
 		self.targetField='readings_story'
 		# For the first method, we will store all data here.
 		self.data={}
+	
+	def joinSourceFields(self,subDict):
+		""" Takes a subset of self.data and transforms it to 
+		the string to be written in the field self.targetField."""
+		out=unicode("")
+		for key in subDict.keys():
+			out+='<span style="color:red">'+key+'</span>: '
+			if subDict[key][self.sourceFields[0]].strip():
+				out+=subDict[key][self.sourceFields[0]].strip()
+			if subDict[key][self.sourceFields[1]].strip():
+				out+="Ex.: "+subDict[key][self.sourceFields[1]].strip()
+			out+="<br>"
+		# split last <br>
+		return out[:-4]
 
 	def setupMenu(self,browser):
 		a = QAction("Sync Reading Stories",browser)
@@ -52,27 +61,13 @@ class readingSync(object):
 		for nid in nids:
 			card=mw.col.getCard(nid)
 			note = card.note()
-			self.dataNote(note)
+			self.datafySingleNote(note)
 
-	def dataNote(self,note):
+	def datafySingleNote(self,note):
 		for kanji in getKanjis(note[self.sourceMatch]):
 				self.data[kanji]={}
 				for sourceField in self.sourceFields:
 					self.data[kanji][sourceField]=note[sourceField]
-
-	def joinSourceFields(self,subDict):
-		""" Takes a subset of self.data and transforms it to 
-		the string to be written in the field self.targetField."""
-		out=unicode("")
-		for key in subDict.keys():
-			out+='<span style="color:red">'+key+'</span>: '
-			if subDict[key][self.sourceFields[0]].strip():
-				out+=subDict[key][self.sourceFields[0]].strip()
-			if subDict[key][self.sourceFields[1]].strip():
-				out+="Ex.: "+subDict[key][self.sourceFields[1]].strip()
-			out+="<br>"
-		# split last <br>
-		return out[:-4]
 
 	def syncAll(self):
 		self.buildData()
@@ -97,7 +92,6 @@ class readingSync(object):
 				subDict[kanji]=self.data[kanji]
 		note[self.targetField]=self.joinSourceFields(subDict)
 		note.flush() # don't forget!
-		print(note[self.targetField])
 	
 	def onFocusLost(self,flag,note,field):
 		""" this method gets called as soon as somebody 
@@ -105,15 +99,13 @@ class readingSync(object):
 		the target field accordingly. See http://ankisrs.net/docs/addons.html#hooks """
 		# first we check if this is a card
 		# we're interested in:
-		# Case 1: 	Somebody changes something in sourceDeck
+		# Case 1: 	Somebody changes something in sourceModel
 		# 			then we update self.data (but don't sync automatically)
-		# Case 2:	Somebody changes something in targetDeck
+		# Case 2:	Somebody changes something in targetModel
 		#			then we sync
 		# whenever a card is irrelevant, we return $flag
-		print('trigger')
-		deck=mw.col.decks.current()['name']
-		print(deck)
-		if deck in self.sourceDecks:
+		model=note.model()['name']
+		if model in self.sourceCards:
 			# here we react only, if one of the sourceFields
 			# from which we extract Information is changed
 			# this is enugh to handle cases of a new kanji-reading
@@ -127,23 +119,45 @@ class readingSync(object):
 							ok=True
 			if not ok:
 				return flag
-			self.dataNote(note)
+			self.datafySingleNote(note)
 			return True
-		elif deck in self.targetDecks:
-			print('target')
-			srcFields=self.targetMatch
+		elif model in self.targetCards:
+			srcFields=[self.targetMatch]
+			ok=False
 			for c, name in enumerate(mw.col.models.fieldNames(note.model())):
 				for f in srcFields:
 					if name == f:
-						src = f
-						srcIdx = c
-			if field != srcIdx:
+						if field==c:
+							ok=True
+			if not ok:
 				return flag
-			print('sync')
 			self.syncSingleTarget(note)
 			return True
 		else:
 			return flag
+
+class exampleSync(readingSync)
+	def __init__(self):
+		super(exampleSync,self).__init__()
+		self.targetDecks=["KANJI::rtk2","KANJI::readings"]
+		self.sourceDecks=["VOCAB::vocabular_main","VOCAB::vocab_new"]
+		self.targetCards=['readings']
+		self.sourceCards=['myJapanese_example_sentences']
+		self.sourceMatch='Expression'
+		self.targetMatch='Expression'
+		self.sourceFields=['Expression','Meaning']
+		self.targetField='kanji_examples'
+	def joinSourceFields(self,subDict):
+		""" Takes a subset of self.data and transforms it to 
+		the string to be written in the field self.targetField."""
+		out=unicode("")
+		for key in subDict.keys():
+			out+='<span style="color:red">'+key+'</span>: '
+			out+=subDict[key][self.sourceFields[0]].strip()
+			out+=" (%s)" % subDict[key][self.sourceFields[1]].strip()
+			out+="<br>"
+		# split last <br>
+		return out[:-4]
 
 a=readingSync()
 addHook('browser.setupMenus',a.setupMenu)
