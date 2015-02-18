@@ -136,7 +136,7 @@ class readingSync(object):
 		else:
 			return flag
 
-class exampleSync(readingSync)
+class exampleSync(readingSync):
 	def __init__(self):
 		super(exampleSync,self).__init__()
 		self.targetDecks=["KANJI::rtk2","KANJI::readings"]
@@ -147,6 +147,10 @@ class exampleSync(readingSync)
 		self.targetMatch='Expression'
 		self.sourceFields=['Expression','Meaning']
 		self.targetField='kanji_examples'
+	def setupMenu(self,browser):
+		a = QAction("Sync Examples",browser)
+		browser.form.menuEdit.addAction(a)
+		browser.connect(a, SIGNAL("triggered()"), self.syncAll)
 	def joinSourceFields(self,subDict):
 		""" Takes a subset of self.data and transforms it to 
 		the string to be written in the field self.targetField."""
@@ -160,5 +164,8 @@ class exampleSync(readingSync)
 		return out[:-4]
 
 a=readingSync()
+b=exampleSync()
 addHook('browser.setupMenus',a.setupMenu)
+addHook('browser.setupMenus',b.setupMenu)
 addHook('editFocusLost', a.onFocusLost)
+addHook('editFocusLost', b.onFocusLost)
