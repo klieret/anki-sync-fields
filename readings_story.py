@@ -12,6 +12,15 @@ from anki.hooks import addHook
 def getKanjis(string):
 		return re.findall(ur'[\u4e00-\u9fbf]',string)
 
+def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
+	out=""
+	for letter in string:
+		if letter!=match:
+			out+=letter
+		else:
+			out+=pre+letter+after
+	return out
+
 class readingSync(object):
 	def __init__(self):
 		# We sync from sourceDecks to targetDecks
@@ -41,10 +50,13 @@ class readingSync(object):
 			if subDict[key][self.sourceFields[0]].strip():
 				out+=subDict[key][self.sourceFields[0]].strip()
 			if subDict[key][self.sourceFields[1]].strip():
-				out+="Ex.: "+subDict[key][self.sourceFields[1]].strip()
+				out+=" Ex.: <br>"+subDict[key][self.sourceFields[1]].strip()+"<br>"
 			out+="<br>"
-		# split last <br>
-		return out[:-4]
+		# split last <br>s
+		if out[:-8]=="<br><br>":
+			return out[:-8]
+		else:
+			return out[:-4]
 
 	def setupMenu(self,browser):
 		a = QAction("Sync Reading Stories",browser)
@@ -156,12 +168,21 @@ class exampleSync(readingSync):
 		the string to be written in the field self.targetField."""
 		out=unicode("")
 		for key in subDict.keys():
-			out+='<span style="color:red">'+key+'</span>: '
-			out+=subDict[key][self.sourceFields[0]].strip()
-			out+=" (%s)" % subDict[key][self.sourceFields[1]].strip()
-			out+="<br>"
+			for i in range(len(subDict[key][self.sourceFields[0]])):
+				out+=highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
+				out+=" (%s)" % subDict[key][self.sourceFields[1]][i].strip().replace('\n','; ').replace('<br>','; ')[:30]
+				out+="<br>"
 		# split last <br>
 		return out[:-4]
+	def datafySingleNote(self,note):
+		for kanji in getKanjis(note[self.sourceMatch]):
+				if not kanji in self.data:
+					self.data[kanji]={}
+				for sourceField in self.sourceFields:
+					if not sourceField in self.data[kanji]:
+						self.data[kanji][sourceField]=[note[sourceField]]
+					else:
+						self.data[kanji][sourceField].append(note[sourceField])
 
 a=readingSync()
 b=exampleSync()
