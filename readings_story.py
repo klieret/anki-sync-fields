@@ -181,7 +181,14 @@ class exampleSync(readingSync):
 				for sourceField in self.sourceFields:
 					if not sourceField in self.data[kanji]:
 						self.data[kanji][sourceField]=[note[sourceField]]
-					else:
+				# now at least one entry exists
+				# maybe we have to update instead of adding new stuff
+				if self.data[kanji][self.sourceFields[0]]==note[self.sourceFields[0]]:
+					# only update
+					self.data[kanji][self.sourceFields[1]]=note[self.sourceFields[1]]
+				else:
+					# append all
+					for soruceField in self.sourceFields:
 						self.data[kanji][sourceField].append(note[sourceField])
 
 a=readingSync()
