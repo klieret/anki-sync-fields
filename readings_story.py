@@ -21,6 +21,11 @@ def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
 			out+=pre+letter+after
 	return out
 
+def clean(string,unwanted,replace):
+	for uw in unwanted:
+		string=string.replace(uw,replace).replace(uw.upper(),replace)
+	return string
+
 class readingSync(object):
 	def __init__(self):
 		# We sync from sourceDecks to targetDecks
@@ -50,7 +55,7 @@ class readingSync(object):
 			if subDict[key][self.sourceFields[0]].strip():
 				out+=subDict[key][self.sourceFields[0]].strip()
 			if subDict[key][self.sourceFields[1]].strip():
-				out+=" Ex.: <br>"+subDict[key][self.sourceFields[1]].strip()+"<br>"
+				out+=" Ex.: "+clean(subDict[key][self.sourceFields[1]],['<br>','\n'],'; ').strip()
 			out+="<br>"
 		# split last <br>s
 		if out[:-8]=="<br><br>":
@@ -74,6 +79,7 @@ class readingSync(object):
 			card=mw.col.getCard(nid)
 			note = card.note()
 			self.datafySingleNote(note)
+		print(self.data)
 
 	def datafySingleNote(self,note):
 		for kanji in getKanjis(note[self.sourceMatch]):
@@ -159,6 +165,7 @@ class exampleSync(readingSync):
 		self.targetMatch='Expression'
 		self.sourceFields=['Expression','Meaning']
 		self.targetField='kanji_examples'
+		self.maxExamples=5
 	def setupMenu(self,browser):
 		a = QAction("Sync Examples",browser)
 		browser.form.menuEdit.addAction(a)
@@ -168,10 +175,19 @@ class exampleSync(readingSync):
 		the string to be written in the field self.targetField."""
 		out=unicode("")
 		for key in subDict.keys():
-			for i in range(len(subDict[key][self.sourceFields[0]])):
+			print(subDict[key][self.sourceFields[0]], len(subDict[key][self.sourceFields[0]]), min(self.maxExamples,len(subDict[key][self.sourceFields[0]])))
+			for i in range(min(self.maxExamples,len(subDict[key][self.sourceFields[0]]))):
 				out+=highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
-				out+=" (%s)" % subDict[key][self.sourceFields[1]][i].strip().replace('\n','; ').replace('<br>','; ')[:30]
-				out+="<br>"
+				meaning=subDict[key][self.sourceFields[1]][i].strip()
+				# clean = case insensitive replace of list members with some string
+				meaning=clean(meaning,['\n','<br>','</div>','</p>',','],'; ')
+				meaning=clean(meaning,['<div>'],'')
+				meaning=clean(meaning,['&nbsp;'],' ')
+				# only one meaning:
+				meaning=meaning.split(';')[0]
+				if meaning[:3]=='1. ':
+					meaning=meaning[3:]
+				out+=" (%s)<br>" % meaning.strip()
 		# split last <br>
 		return out[:-4]
 	def datafySingleNote(self,note):
@@ -183,12 +199,13 @@ class exampleSync(readingSync):
 						self.data[kanji][sourceField]=[note[sourceField]]
 				# now at least one entry exists
 				# maybe we have to update instead of adding new stuff
-				if self.data[kanji][self.sourceFields[0]]==note[self.sourceFields[0]]:
+				if note[self.sourceFields[0]] in self.data[kanji][self.sourceFields[0]]:
 					# only update
-					self.data[kanji][self.sourceFields[1]]=note[self.sourceFields[1]]
+					index=self.data[kanji][self.sourceFields[0]].index(note[self.sourceFields[0]])
+					self.data[kanji][self.sourceFields[1]][index]=note[self.sourceFields[1]]
 				else:
 					# append all
-					for soruceField in self.sourceFields:
+					for sourceField in self.sourceFields:
 						self.data[kanji][sourceField].append(note[sourceField])
 
 a=readingSync()
