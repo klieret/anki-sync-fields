@@ -22,7 +22,7 @@ def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
 	if not len(match) == 1:
 		# just to make sure....
 		raise ValueError, "Argument $match must be single character letter!"
-	out=""
+	out = ""
 	for letter in string:
 		if letter != match:
 			out += letter
@@ -40,6 +40,10 @@ def clean(string,unwanted,replace):
 
 class readingSync(object):
 	def __init__(self):
+		"""Mostly configuration stuff."""
+
+		# ------------------------------ Configuration ------------------------------
+
 		# We sync from sourceDecks to targetDecks
 		# Note that if you have sutargetDecks, e.g. a subdeck rtk2
 		# to the deck KANJI, then the name of the deck is KANJI::rtk2
@@ -55,30 +59,19 @@ class readingSync(object):
 		# Take data from field sourceField and write it to targetField
 		self.sourceFields=['story', 'kanji_examples']
 		self.targetField='readings_story'
+
+		# ------------------------------------  -------------------------------------
+
 		# For the first method, we will store all data here.
 		self.data={}
 	
-	def joinSourceFields(self,subDict):
-		""" Takes a subset of self.data and transforms it to 
-		the string to be written in the field self.targetField."""
-		out=unicode("")
-		for key in subDict.keys():
-			out+='<span style="color:red">'+key+'</span>: '
-			if subDict[key][self.sourceFields[0]].strip():
-				out += subDict[key][self.sourceFields[0]].strip()
-			if subDict[key][self.sourceFields[1]].strip():
-				out += " Ex.: "+clean(subDict[key][self.sourceFields[1]],['<br>','\n'],'; ').strip()
-			out += "<br>"
-		# split last <br>s
-		if out[:-8] == "<br><br>":
-			return out[:-8]
-		else:
-			return out[:-4]
-
 	def setupMenu(self,browser):
+		"""Create one button that triggers the sync. """
 		a = QAction("Sync Reading Stories",browser)
 		browser.form.menuEdit.addAction(a)
 		browser.connect(a, SIGNAL("triggered()"), self.syncAll)
+
+	# -------------------------------------  -------------------------------------
 
 	def buildData(self):
 		""" Build self.data """
@@ -98,6 +91,8 @@ class readingSync(object):
 			self.data[kanji] = {}
 			for sourceField in self.sourceFields:
 				self.data[kanji][sourceField] = note[sourceField]
+
+	# -------------------------------------  -------------------------------------
 
 	def syncAll(self):
 		self.buildData()
@@ -123,6 +118,27 @@ class readingSync(object):
 				subDict[kanji] = self.data[kanji]
 		note[self.targetField] = self.joinSourceFields(subDict)
 		note.flush() # don't forget!
+
+	# -------------------------------------  -------------------------------------
+
+	def joinSourceFields(self,subDict):
+		""" Takes a subset of self.data and transforms it to 
+		the string to be written in the field self.targetField."""
+		out = unicode("")
+		for key in subDict.keys():
+			out+='<span style="color:red">'+key+'</span>: '
+			if subDict[key][self.sourceFields[0]].strip():
+				out += subDict[key][self.sourceFields[0]].strip()
+			if subDict[key][self.sourceFields[1]].strip():
+				out += " Ex.: "+clean(subDict[key][self.sourceFields[1]],['<br>','\n'],'; ').strip()
+			out += "<br>"
+		# split last <br>s
+		if out[:-8] == "<br><br>":
+			return out[:-8]
+		else:
+			return out[:-4]
+
+	# -------------------------------------  -------------------------------------
 	
 	def onFocusLost(self,flag,note,field):
 		""" this method gets called as soon as somebody 
@@ -169,6 +185,7 @@ class readingSync(object):
 
 class exampleSync(readingSync):
 	def __init__(self):
+		# todo: this is probably not how you should do it....
 		super(exampleSync,self).__init__()
 		self.targetDecks = ["KANJI::rtk2","KANJI::readings"]
 		self.sourceDecks = ["VOCAB::vocabular_main","VOCAB::vocab_new"]
@@ -179,10 +196,12 @@ class exampleSync(readingSync):
 		self.sourceFields = ['Expression','Meaning']
 		self.targetField = 'kanji_examples'
 		self.maxExamples = 5
+	
 	def setupMenu(self,browser):
 		a = QAction("Sync Examples",browser)
 		browser.form.menuEdit.addAction(a)
 		browser.connect(a, SIGNAL("triggered()"), self.syncAll)
+	
 	def joinSourceFields(self,subDict):
 		""" Takes a subset of self.data and transforms it to 
 		the string to be written in the field self.targetField."""
@@ -202,6 +221,7 @@ class exampleSync(readingSync):
 				out += " (%s)<br>" % meaning.strip()
 		# split last <br>
 		return out[:-4]
+
 	def datafySingleNote(self,note):
 		for kanji in getKanjis(note[self.sourceMatch]):
 				if not kanji in self.data:
