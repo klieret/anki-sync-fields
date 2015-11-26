@@ -31,9 +31,11 @@ def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
 	return out
 
 def clean(string,unwanted,replace):
-	""" Replaces all the elements from list $unwanted in $string by $replace."""
+	""" Replaces all the elements from list $unwanted in $string by $replace.
+	(case insensitive!)"""
 	for uw in unwanted:
-		string = string.replace(uw,replace).replace(uw.upper(),replace)
+		regex = re.compile(re.escape(uw), re.IGNORECASE)
+		string = regex.sub(replace, string)
 	return string
 
 class readingSync(object):
