@@ -1,33 +1,39 @@
 #!/usr/bin/env python
+
 import re
+
 # import the main window object (mw) from ankiqt
 from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
 # import all of the Qt GUI library
 from aqt.qt import *
+# hooks....
 from anki.hooks import addHook
 
 
 def getKanjis(string):
 	"""Returns all kanjis from $string as a list"""
-	return re.findall(ur'[\u4e00-\u9fbf]',string)
+	return re.findall(ur'[\u4e00-\u9fbf]', string)
 
 def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
-	"""Looks for $match in $string and returns the string with $pre$match$after
-	inserted for every $match. """
+	"""Looks for all occurences of the character $match in $string and returns 
+	the string with $pre$match$after inserted for every $match. """
+	if not len(match) == 1:
+		# just to make sure....
+		raise ValueError, "Argument $match must be single character letter!"
 	out=""
 	for letter in string:
-		if letter!=match:
-			out+=letter
+		if letter != match:
+			out += letter
 		else:
-			out+=pre+letter+after
+			out += pre+letter+after
 	return out
 
 def clean(string,unwanted,replace):
-	""" Replaces all the elements from $unwanted in $string by $replace."""
+	""" Replaces all the elements from list $unwanted in $string by $replace."""
 	for uw in unwanted:
-		string=string.replace(uw,replace).replace(uw.upper(),replace)
+		string = string.replace(uw,replace).replace(uw.upper(),replace)
 	return string
 
 class readingSync(object):
