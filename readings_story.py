@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-print "Loading"
-
 import re
 
 # import the main window object (mw) from ankiqt
 from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
-# 	import all of the Qt GUI library
+# import all of the Qt GUI library
 from aqt.qt import *
 # hooks....
 from anki.hooks import addHook
@@ -24,7 +22,7 @@ def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
     the string with $pre$match$after inserted for every $match. """
     if not len(match) == 1:
         # just to make sure....
-        raise ValueError, "Argument $match must be single character letter!"
+        raise (ValueError, "Argument $match must be single character letter!")
     out = ""
     for letter in string:
         if letter != match:
@@ -152,7 +150,7 @@ class readingSync(object):
         # Case 1: 	Somebody changes something in sourceModel
         # 			then we update self.data (but don't sync automatically)
         # Case 2:	Somebody changes something in targetModel
-        #			then we sync
+        #   		then we sync
         # whenever a card is irrelevant, we return $flag
         model = note.model()['name']
         if model in self.sourceCards:
@@ -189,28 +187,28 @@ class readingSync(object):
 class exampleSync(readingSync):
     def __init__(self):
         # todo: this is probably not how you should do it....
-        super(exampleSync,self).__init__()
+        super(exampleSync, self).__init__()
         self.targetDecks = ["KANJI::readings"]
         self.sourceDecks = ["VOCAB::vocabular_main", "VOCAB::vocab_new", "VOCAB::vocab_kanji1000", "VOCAB::vocab_saikin"]
-        self.deck_tag_dict = {"VOCAB::vocabular_main":"本",
-                               "VOCAB::vocab_new":"新",
-                               "VOCAB::vocab_saikin":"最",
-                               "VOCAB::vocab_kanji1000":"漢"}
+        self.deck_tag_dict = {"VOCAB::vocabular_main": "本",
+                              "VOCAB::vocab_new": "新",
+                              "VOCAB::vocab_saikin": "最",
+                              "VOCAB::vocab_kanji1000": "漢"}
         self.targetCards = ['readings']
         self.sourceCards = ['myJapanese_example_sentences']
-        self.sourceMatch =  'Expression'
+        self.sourceMatch = 'Expression'
         self.targetMatch = 'Expression'
         self.sourceFields = ['Expression','Meaning']
         self.targetField = 'kanji_examples'
         self.maxExamples = 5
 
-    def setupMenu(self,browser):
+    def setupMenu(self, browser):
         a = QAction("Sync Examples",browser)
         browser.form.menuEdit.addAction(a)
         browser.connect(a, SIGNAL("triggered()"), self.syncAll)
         print("Set up menu")
 
-    def joinSourceFields(self,subDict):
+    def joinSourceFields(self, subDict):
         """ Takes a subset of self.data and transforms it to
         the string to be written in the field self.targetField."""
         out = unicode("")
@@ -241,13 +239,13 @@ class exampleSync(readingSync):
         for kanji in getKanjis(note[self.sourceMatch]):
 
                 # if there is no entry for that kanji in the database, create a blank one
-                if not kanji in self.data:
+                if kanji not in self.data:
                     self.data[kanji] = {}
 
                 # now we look if there's an entry for the sourceFieldNames and if not
                 # we create one with the value we just found
                 for sourceField in self.sourceFields:
-                    if not sourceField in self.data[kanji]:
+                    if sourceField not in self.data[kanji]:
                         self.data[kanji][sourceField] = [note[sourceField]]
 
                 # now at least one entry exists
@@ -267,11 +265,9 @@ class exampleSync(readingSync):
                 else:
                     self.data[kanji]["DECK"].append(deck)
 
-# a = readingSync()
-# print("init1")
-# b = exampleSync()
-# print("init2")
-# addHook('browser.setupMenus',a.setupMenu)
-# addHook('browser.setupMenus',b.setupMenu)
-# addHook('editFocusLost', a.onFocusLost)
-# addHook('editFocusLost', b.onFocusLost)
+a = readingSync()
+b = exampleSync()
+addHook('browser.setupMenus', a.setupMenu)
+addHook('browser.setupMenus', b.setupMenu)
+addHook('editFocusLost', a.onFocusLost)
+addHook('editFocusLost', b.onFocusLost)
