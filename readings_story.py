@@ -43,9 +43,9 @@ class readingSync(object):
 		# We sync from sourceDecks to targetDecks
 		# Note that if you have sutargetDecks, e.g. a subdeck rtk2
 		# to the deck KANJI, then the name of the deck is KANJI::rtk2
-		self.sourceDecks=["KANJI::rtk2","KANJI::readings"]
-		self.targetDecks=["VOCAB::vocabular_main","VOCAB::vocab_new"]
-		# For the automated completion of fields checks 
+		self.sourceDecks=["KANJI::rtk2", "KANJI::readings"]
+		self.targetDecks=["VOCAB::vocabular_main", "VOCAB::vocab_new"]
+		# For the automated completion of fields, check 
 		# for the card type instead:
 		self.sourceCards=['readings']
 		self.targetCards=['myJapanese_example_sentences']
@@ -53,7 +53,7 @@ class readingSync(object):
 		self.sourceMatch='Expression'
 		self.targetMatch='Expression'
 		# Take data from field sourceField and write it to targetField
-		self.sourceFields=['story','kanji_examples']
+		self.sourceFields=['story', 'kanji_examples']
 		self.targetField='readings_story'
 		# For the first method, we will store all data here.
 		self.data={}
@@ -65,12 +65,12 @@ class readingSync(object):
 		for key in subDict.keys():
 			out+='<span style="color:red">'+key+'</span>: '
 			if subDict[key][self.sourceFields[0]].strip():
-				out+=subDict[key][self.sourceFields[0]].strip()
+				out += subDict[key][self.sourceFields[0]].strip()
 			if subDict[key][self.sourceFields[1]].strip():
-				out+=" Ex.: "+clean(subDict[key][self.sourceFields[1]],['<br>','\n'],'; ').strip()
-			out+="<br>"
+				out += " Ex.: "+clean(subDict[key][self.sourceFields[1]],['<br>','\n'],'; ').strip()
+			out += "<br>"
 		# split last <br>s
-		if out[:-8]=="<br><br>":
+		if out[:-8] == "<br><br>":
 			return out[:-8]
 		else:
 			return out[:-4]
@@ -83,45 +83,45 @@ class readingSync(object):
 	def buildData(self):
 		""" Build self.data """
 		# loop through sourceDeck and build self.data
-		nids=[]
-		self.data={}
+		nids = []
+		self.data = {}
 		for deck in self.sourceDecks:
-			nids+=mw.col.findCards("deck:%s" % deck)
+			nids += mw.col.findCards("deck:%s" % deck)
 		for nid in nids:
-			card=mw.col.getCard(nid)
+			card = mw.col.getCard(nid)
 			note = card.note()
 			self.datafySingleNote(note)
 
 	def datafySingleNote(self,note):
 		#print("Datafy single")
 		for kanji in getKanjis(note[self.sourceMatch]):
-			self.data[kanji]={}
+			self.data[kanji] = {}
 			for sourceField in self.sourceFields:
-				self.data[kanji][sourceField]=note[sourceField]
+				self.data[kanji][sourceField] = note[sourceField]
 
 	def syncAll(self):
 		self.buildData()
 		# get all note ids that should be updated
-		nids=[]
+		nids = []
 		for deck in self.targetDecks:
-			nids+=mw.col.findCards("deck:%s" % deck)
+			nids += mw.col.findCards("deck:%s" % deck)
 		# loop over them
 		for nid in nids:
-			card=mw.col.getCard(nid)
-			note=card.note()
+			card = mw.col.getCard(nid)
+			note = card.note()
 			self.syncSingleTarget(note)
 	
 	def syncSingleTarget(self,note):
-		if self.data=={}:
+		if self.data == {}:
 			# self.data has not been initialized
 			print("Initializing self.data")
 			self.buildData()
-		kanjis=getKanjis(note[self.sourceMatch])
-		subDict={}
+		kanjis = getKanjis(note[self.sourceMatch])
+		subDict = {}
 		for kanji in kanjis:
 			if kanji in self.data.keys():
-				subDict[kanji]=self.data[kanji]
-		note[self.targetField]=self.joinSourceFields(subDict)
+				subDict[kanji] = self.data[kanji]
+		note[self.targetField] = self.joinSourceFields(subDict)
 		note.flush() # don't forget!
 	
 	def onFocusLost(self,flag,note,field):
@@ -135,31 +135,31 @@ class readingSync(object):
 		# Case 2:	Somebody changes something in targetModel
 		#			then we sync
 		# whenever a card is irrelevant, we return $flag
-		model=note.model()['name']
+		model = note.model()['name']
 		if model in self.sourceCards:
 			# here we react only, if one of the sourceFields
 			# from which we extract Information is changed
 			# this is enugh to handle cases of a new kanji-reading
 			# added.
-			srcFields=self.sourceFields
-			ok=False
+			srcFields = self.sourceFields
+			ok = False
 			for c, name in enumerate(mw.col.models.fieldNames(note.model())):
 				for f in srcFields:
 					if name == f:
-						if field==c:
-							ok=True
+						if field == c:
+							ok = True
 			if not ok:
 				return flag
 			self.datafySingleNote(note)
 			return True
 		elif model in self.targetCards:
-			srcFields=[self.targetMatch]
-			ok=False
+			srcFields = [self.targetMatch]
+			ok = False
 			for c, name in enumerate(mw.col.models.fieldNames(note.model())):
 				for f in srcFields:
 					if name == f:
-						if field==c:
-							ok=True
+						if field == c:
+							ok = True
 			if not ok:
 				return flag
 			self.syncSingleTarget(note)
@@ -170,15 +170,15 @@ class readingSync(object):
 class exampleSync(readingSync):
 	def __init__(self):
 		super(exampleSync,self).__init__()
-		self.targetDecks=["KANJI::rtk2","KANJI::readings"]
-		self.sourceDecks=["VOCAB::vocabular_main","VOCAB::vocab_new"]
-		self.targetCards=['readings']
-		self.sourceCards=['myJapanese_example_sentences']
-		self.sourceMatch='Expression'
-		self.targetMatch='Expression'
-		self.sourceFields=['Expression','Meaning']
-		self.targetField='kanji_examples'
-		self.maxExamples=5
+		self.targetDecks = ["KANJI::rtk2","KANJI::readings"]
+		self.sourceDecks = ["VOCAB::vocabular_main","VOCAB::vocab_new"]
+		self.targetCards = ['readings']
+		self.sourceCards = ['myJapanese_example_sentences']
+		self.sourceMatch =  'Expression'
+		self.targetMatch = 'Expression'
+		self.sourceFields = ['Expression','Meaning']
+		self.targetField = 'kanji_examples'
+		self.maxExamples = 5
 	def setupMenu(self,browser):
 		a = QAction("Sync Examples",browser)
 		browser.form.menuEdit.addAction(a)
@@ -186,42 +186,42 @@ class exampleSync(readingSync):
 	def joinSourceFields(self,subDict):
 		""" Takes a subset of self.data and transforms it to 
 		the string to be written in the field self.targetField."""
-		out=unicode("")
+		out = unicode("")
 		for key in subDict.keys():
 			for i in range(min(self.maxExamples,len(subDict[key][self.sourceFields[0]]))):
-				out+=highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
-				meaning=subDict[key][self.sourceFields[1]][i].strip()
+				out += highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
+				meaning = subDict[key][self.sourceFields[1]][i].strip()
 				# clean = case insensitive replace of list members with some string
-				meaning=clean(meaning,['\n','<br>','</div>','</p>',','],'; ')
-				meaning=clean(meaning,['<div>'],'')
-				meaning=clean(meaning,['&nbsp;'],' ')
+				meaning = clean(meaning,['\n','<br>','</div>','</p>',','],'; ')
+				meaning = clean(meaning,['<div>'],'')
+				meaning = clean(meaning,['&nbsp;'],' ')
 				# only one meaning:
-				meaning=meaning.split(';')[0]
-				if meaning[:3]=='1. ':
+				meaning = meaning.split(';')[0]
+				if meaning[:3] == '1. ':
 					meaning=meaning[3:]
-				out+=" (%s)<br>" % meaning.strip()
+				out += " (%s)<br>" % meaning.strip()
 		# split last <br>
 		return out[:-4]
 	def datafySingleNote(self,note):
 		for kanji in getKanjis(note[self.sourceMatch]):
 				if not kanji in self.data:
-					self.data[kanji]={}
+					self.data[kanji] = {}
 				for sourceField in self.sourceFields:
 					if not sourceField in self.data[kanji]:
-						self.data[kanji][sourceField]=[note[sourceField]]
+						self.data[kanji][sourceField] = [note[sourceField]]
 				# now at least one entry exists
 				# maybe we have to update instead of adding new stuff
 				if note[self.sourceFields[0]] in self.data[kanji][self.sourceFields[0]]:
 					# only update
 					index=self.data[kanji][self.sourceFields[0]].index(note[self.sourceFields[0]])
-					self.data[kanji][self.sourceFields[1]][index]=note[self.sourceFields[1]]
+					self.data[kanji][self.sourceFields[1]][index] = note[self.sourceFields[1]]
 				else:
 					# append all
 					for sourceField in self.sourceFields:
 						self.data[kanji][sourceField].append(note[sourceField])
 
-a=readingSync()
-b=exampleSync()
+a = readingSync()
+b = exampleSync()
 addHook('browser.setupMenus',a.setupMenu)
 addHook('browser.setupMenus',b.setupMenu)
 addHook('editFocusLost', a.onFocusLost)
