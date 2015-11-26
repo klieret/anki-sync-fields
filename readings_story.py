@@ -17,7 +17,7 @@ def getKanjis(string):
     """Returns all kanjis from $string as a list"""
     return re.findall(ur'[\u4e00-\u9fbf]', string)
 
-def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
+def highlightMatch(string,match,pre='<span style="color:red">', after='</span>'):
     """Looks for all occurences of the character $match in $string and returns
     the string with $pre$match$after inserted for every $match. """
     if not len(match) == 1:
@@ -167,7 +167,7 @@ class readingSync(object):
                             ok = True
             if not ok:
                 return flag
-            self.datafySingleNote(note)
+            self.datafySingleNote(note, "") # todo: deck!
             return True
         elif model in self.targetCards:
             srcFields = [self.targetMatch]
@@ -190,15 +190,16 @@ class exampleSync(readingSync):
         super(exampleSync, self).__init__()
         self.targetDecks = ["KANJI::readings"]
         self.sourceDecks = ["VOCAB::vocabular_main", "VOCAB::vocab_new", "VOCAB::vocab_kanji1000", "VOCAB::vocab_saikin"]
-        self.deck_tag_dict = {"VOCAB::vocabular_main": "本",
-                              "VOCAB::vocab_new": "新",
-                              "VOCAB::vocab_saikin": "最",
-                              "VOCAB::vocab_kanji1000": "漢"}
+        self.deck_tag_dict = {"VOCAB::vocabular_main": u"本",
+                              "VOCAB::vocab_new": u"新",
+                              "VOCAB::vocab_saikin": u"最",
+                              "VOCAB::vocab_kanji1000":u"漢",
+                              "":"無"}
         self.targetCards = ['readings']
         self.sourceCards = ['myJapanese_example_sentences']
         self.sourceMatch = 'Expression'
         self.targetMatch = 'Expression'
-        self.sourceFields = ['Expression','Meaning']
+        self.sourceFields = ['Reading','Meaning']
         self.targetField = 'kanji_examples'
         self.maxExamples = 5
 
@@ -217,14 +218,15 @@ class exampleSync(readingSync):
                 out += highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
                 meaning = subDict[key][self.sourceFields[1]][i].strip()
                 # clean = case insensitive replace of list members with some string
-                meaning = clean(meaning,['\n','<br>','</div>','</p>',','],'; ')
-                meaning = clean(meaning,['<div>'],'')
-                meaning = clean(meaning,['&nbsp;'],' ')
+                meaning = clean(meaning, ['\n', '<br>', '</div>', '</p>', ','], '; ')
+                meaning = clean(meaning, ['<div>'],'')
+                meaning = clean(meaning, ['&nbsp;'],' ')
                 # only one meaning:
                 meaning = meaning.split(';')[0]
                 if meaning[:3] == '1. ':
                     meaning = meaning[3:]
-                out += " (%s)<br>" % meaning.strip()
+                deck = unicode(self.deck_tag_dict[subDict[key]["DECK"][i]])
+                out += " (%s) [%s]<br>" % (meaning.strip(), deck)
         # split last <br>
         return out[:-4]
 
