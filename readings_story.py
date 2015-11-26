@@ -10,9 +10,12 @@ from anki.hooks import addHook
 
 
 def getKanjis(string):
-		return re.findall(ur'[\u4e00-\u9fbf]',string)
+	"""Returns all kanjis from $string as a list"""
+	return re.findall(ur'[\u4e00-\u9fbf]',string)
 
 def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
+	"""Looks for $match in $string and returns the string with $pre$match$after
+	inserted for every $match. """
 	out=""
 	for letter in string:
 		if letter!=match:
@@ -22,6 +25,7 @@ def highlightMatch(string,match,pre='<span style="color:red">',after='</span>'):
 	return out
 
 def clean(string,unwanted,replace):
+	""" Replaces all the elements from $unwanted in $string by $replace."""
 	for uw in unwanted:
 		string=string.replace(uw,replace).replace(uw.upper(),replace)
 	return string
@@ -79,13 +83,13 @@ class readingSync(object):
 			card=mw.col.getCard(nid)
 			note = card.note()
 			self.datafySingleNote(note)
-		print(self.data)
 
 	def datafySingleNote(self,note):
+		#print("Datafy single")
 		for kanji in getKanjis(note[self.sourceMatch]):
-				self.data[kanji]={}
-				for sourceField in self.sourceFields:
-					self.data[kanji][sourceField]=note[sourceField]
+			self.data[kanji]={}
+			for sourceField in self.sourceFields:
+				self.data[kanji][sourceField]=note[sourceField]
 
 	def syncAll(self):
 		self.buildData()
@@ -102,6 +106,7 @@ class readingSync(object):
 	def syncSingleTarget(self,note):
 		if self.data=={}:
 			# self.data has not been initialized
+			print("Initializing self.data")
 			self.buildData()
 		kanjis=getKanjis(note[self.sourceMatch])
 		subDict={}
@@ -175,7 +180,6 @@ class exampleSync(readingSync):
 		the string to be written in the field self.targetField."""
 		out=unicode("")
 		for key in subDict.keys():
-			print(subDict[key][self.sourceFields[0]], len(subDict[key][self.sourceFields[0]]), min(self.maxExamples,len(subDict[key][self.sourceFields[0]])))
 			for i in range(min(self.maxExamples,len(subDict[key][self.sourceFields[0]]))):
 				out+=highlightMatch(subDict[key][self.sourceFields[0]][i].strip(),key)
 				meaning=subDict[key][self.sourceFields[1]][i].strip()
