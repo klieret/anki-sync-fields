@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+print "Loading"
 
 import re
 
@@ -6,7 +9,7 @@ import re
 from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
-# import all of the Qt GUI library
+# 	import all of the Qt GUI library
 from aqt.qt import *
 # hooks....
 from anki.hooks import addHook
@@ -47,8 +50,8 @@ class readingSync(object):
 		# We sync from sourceDecks to targetDecks
 		# Note that if you have sutargetDecks, e.g. a subdeck rtk2
 		# to the deck KANJI, then the name of the deck is KANJI::rtk2
-		self.sourceDecks=["KANJI::rtk2", "KANJI::readings"]
-		self.targetDecks=["VOCAB::vocabular_main", "VOCAB::vocab_new"]
+		self.sourceDecks=["KANJI::readings"]
+		self.targetDecks=["VOCAB::vocabular_main", "VOCAB::vocab_new", "VOCAB::vocab_kanji1000", "VOCAB::vocab_saikin"]
 		# For the automated completion of fields, check 
 		# for the card type instead:
 		self.sourceCards=['readings']
@@ -76,19 +79,19 @@ class readingSync(object):
 	def buildData(self):
 		""" Build self.data """
 		# loop through sourceDeck and build self.data
-		nids = []
 		self.data = {}
 		for deck in self.sourceDecks:
-			nids += mw.col.findCards("deck:%s" % deck)
-		for nid in nids:
-			card = mw.col.getCard(nid)
-			note = card.note()
-			self.datafySingleNote(note)
+			nids = mw.col.findCards("deck:%s" % deck)
+			for nid in nids:
+				card = mw.col.getCard(nid)
+				note = card.note()
+				self.datafySingleNote(note, deck)
 
-	def datafySingleNote(self,note):
+	def datafySingleNote(self,note,deck):
 		#print("Datafy single")
 		for kanji in getKanjis(note[self.sourceMatch]):
 			self.data[kanji] = {}
+			self.data[kanji]["DECK"] = deck
 			for sourceField in self.sourceFields:
 				self.data[kanji][sourceField] = note[sourceField]
 
@@ -153,9 +156,9 @@ class readingSync(object):
 		# whenever a card is irrelevant, we return $flag
 		model = note.model()['name']
 		if model in self.sourceCards:
-			# here we react only, if one of the sourceFields
+			# here we react only if one of the sourceFields
 			# from which we extract Information is changed
-			# this is enugh to handle cases of a new kanji-reading
+			# this is enough to handle cases of a new kanji-reading
 			# added.
 			srcFields = self.sourceFields
 			ok = False
@@ -187,8 +190,12 @@ class exampleSync(readingSync):
 	def __init__(self):
 		# todo: this is probably not how you should do it....
 		super(exampleSync,self).__init__()
-		self.targetDecks = ["KANJI::rtk2","KANJI::readings"]
-		self.sourceDecks = ["VOCAB::vocabular_main","VOCAB::vocab_new"]
+		self.targetDecks = ["KANJI::readings"]
+		self.sourceDecks = ["VOCAB::vocabular_main", "VOCAB::vocab_new", "VOCAB::vocab_kanji1000", "VOCAB::vocab_saikin"]
+		self.deck_tag_dict = {"VOCAB::vocabular_main":"本", 
+							   "VOCAB::vocab_new":"新", 
+							   "VOCAB::vocab_saikin":"最",
+							   "VOCAB::vocab_kanji1000":"漢"}
 		self.targetCards = ['readings']
 		self.sourceCards = ['myJapanese_example_sentences']
 		self.sourceMatch =  'Expression'
@@ -201,6 +208,7 @@ class exampleSync(readingSync):
 		a = QAction("Sync Examples",browser)
 		browser.form.menuEdit.addAction(a)
 		browser.connect(a, SIGNAL("triggered()"), self.syncAll)
+		print("Set up menu")
 	
 	def joinSourceFields(self,subDict):
 		""" Takes a subset of self.data and transforms it to 
@@ -217,18 +225,31 @@ class exampleSync(readingSync):
 				# only one meaning:
 				meaning = meaning.split(';')[0]
 				if meaning[:3] == '1. ':
-					meaning=meaning[3:]
+					meaning = meaning[3:]
 				out += " (%s)<br>" % meaning.strip()
 		# split last <br>
 		return out[:-4]
 
-	def datafySingleNote(self,note):
+	def datafySingleNote(self,note,deck):
+		# self.data looks like this:
+		# { kanji1 : { sourceField1Name : [ sourceFieldValue1, sourceFieldValue2, ...] },
+		#            { sourceField2Name : [ sourceFieldValue1, sourceFieldValue2, ...] } 
+		#   kanji2 : ... }
+		# where sourceFieldValue1, sourceFieldValue2 etc. belong to the same source note.
+		
+		# loop over all kanjis that are found in the sourceMatch field of the source note
 		for kanji in getKanjis(note[self.sourceMatch]):
+
+				# if there is no entry for that kanji in the database, create a blank one
 				if not kanji in self.data:
 					self.data[kanji] = {}
+
+				# now we look if there's an entry for the sourceFieldNames and if not
+				# we create one with the value we just found 
 				for sourceField in self.sourceFields:
 					if not sourceField in self.data[kanji]:
 						self.data[kanji][sourceField] = [note[sourceField]]
+				
 				# now at least one entry exists
 				# maybe we have to update instead of adding new stuff
 				if note[self.sourceFields[0]] in self.data[kanji][self.sourceFields[0]]:
@@ -239,10 +260,18 @@ class exampleSync(readingSync):
 					# append all
 					for sourceField in self.sourceFields:
 						self.data[kanji][sourceField].append(note[sourceField])
+				
+				# doing the same thing with the deck value
+				if not "DECK" in self.data[kanji]:
+					self.data[kanji]["DECK"] = [deck]
+				else:
+					self.data[kanji]["DECK"].append(deck)
 
-a = readingSync()
-b = exampleSync()
-addHook('browser.setupMenus',a.setupMenu)
-addHook('browser.setupMenus',b.setupMenu)
-addHook('editFocusLost', a.onFocusLost)
-addHook('editFocusLost', b.onFocusLost)
+# a = readingSync()
+# print("init1")
+# b = exampleSync()
+# print("init2")
+# addHook('browser.setupMenus',a.setupMenu)
+# addHook('browser.setupMenus',b.setupMenu)
+# addHook('editFocusLost', a.onFocusLost)
+# addHook('editFocusLost', b.onFocusLost)
