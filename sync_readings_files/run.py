@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from example_sync import exampleSync
-from reading_sync import readingSync
+from example_sync import ExampleSync
+from reading_sync import ReadingsSync
 
 from aqt.qt import *
 from anki.hooks import addHook
 
 
-a = readingSync()
-b = exampleSync()
-addHook('browser.setupMenus', a.setupMenu)
-addHook('browser.setupMenus', b.setupMenu)
-addHook('editFocusLost', a.onFocusLost)
-addHook('editFocusLost', b.onFocusLost)
+a = ReadingsSync()
+b = ExampleSync()
+addHook('browser.setupMenus', a.setup_menu)
+addHook('browser.setupMenus', b.setup_menu)
+addHook('editFocusLost', a.on_focus_lost)
+addHook('editFocusLost', b.on_focus_lost)

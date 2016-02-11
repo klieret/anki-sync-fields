@@ -6,7 +6,8 @@ from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.qt import *
 
-class sync():
+
+class Sync():
     def __init__(self):
         self.targetDecks = []
         self.sourceDecks = []
@@ -17,13 +18,14 @@ class sync():
         self.sourceFields = ['']
         self.targetField = ''
         self.menu_item_name = ""
+        self.data = {}
 
-    def setupMenu(self, browser):
-        a = QAction(self.menu_item_name,browser)
+    def setup_menu(self, browser):
+        a = QAction(self.menu_item_name, browser)
         browser.form.menuEdit.addAction(a)
-        browser.connect(a, SIGNAL("triggered()"), self.syncAll)
+        browser.connect(a, SIGNAL("triggered()"), self.sync_all)
 
-    def buildData(self):
+    def build_data(self):
         """ Build self.data """
         # loop through sourceDeck and build self.data
         self.data = {}
@@ -32,13 +34,13 @@ class sync():
             for nid in nids:
                 card = mw.col.getCard(nid)
                 note = card.note()
-                self.datafySingleNote(note, deck)
+                self.datafy_single_note(note, deck)
 
-    def datafySingleNote(self,note,deck):
+    def datafy_single_note(self, note, deck):
         pass
 
-    def syncAll(self):
-        self.buildData()
+    def sync_all(self):
+        self.build_data()
         # get all note ids that should be updated
         nids = []
         for deck in self.targetDecks:
@@ -47,17 +49,15 @@ class sync():
         for nid in nids:
             card = mw.col.getCard(nid)
             note = card.note()
-            self.syncSingleTarget(note)
+            self.sync_single_target(note)
 
-    def syncSingleTarget(self,note):
+    def sync_single_target(self, note):
         pass
 
-
-    def joinSourceFields(self,subDict):
+    def join_source_fields(self, sub_dict):
         return ""
 
-
-    def onFocusLost(self,flag,note,field):
+    def on_focus_lost(self, flag, note, field):
         """ this method gets called as soon as somebody
         edits a field on a card, i.e. we use it to automatically update
         the target field accordingly. See http://ankisrs.net/docs/addons.html#hooks """
@@ -74,28 +74,28 @@ class sync():
             # from which we extract Information is changed
             # this is enough to handle cases of a new kanji-reading
             # added.
-            srcFields = self.sourceFields
+            src_fields = self.sourceFields
             ok = False
             for c, name in enumerate(mw.col.models.fieldNames(note.model())):
-                for f in srcFields:
+                for f in src_fields:
                     if name == f:
                         if field == c:
                             ok = True
             if not ok:
                 return flag
-            self.datafySingleNote(note, "") # todo: deck!
+            self.datafy_single_note(note, "")  # todo: deck!
             return True
         elif model in self.targetCards:
-            srcFields = [self.targetMatch]
+            src_fields = [self.targetMatch]
             ok = False
             for c, name in enumerate(mw.col.models.fieldNames(note.model())):
-                for f in srcFields:
+                for f in src_fields:
                     if name == f:
                         if field == c:
                             ok = True
             if not ok:
                 return flag
-            self.syncSingleTarget(note)
+            self.sync_single_target(note)
             return True
         else:
             return flag

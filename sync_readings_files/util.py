@@ -3,11 +3,13 @@
 
 import re
 
-def getKanjis(string):
+
+def get_kanjis(string):
     """Returns all kanjis from $string as a list"""
     return re.findall(ur'[\u4e00-\u9fbf]', string)
 
-def highlightMatch(string,match,pre='<span style="color:red">', after='</span>'):
+
+def highlight_match(string, match, pre='<span style="color:red">', after='</span>'):
     """Looks for all occurences of the character $match in $string and returns
     the string with $pre$match$after inserted for every $match. """
     if not len(match) == 1:
@@ -21,7 +23,8 @@ def highlightMatch(string,match,pre='<span style="color:red">', after='</span>')
             out += pre+letter+after
     return out
 
-def clean(string,unwanted,replace):
+
+def clean(string, unwanted, replace):
     """ Replaces all the elements from list $unwanted in $string by $replace.
     (case insensitive!)"""
     for uw in unwanted:
