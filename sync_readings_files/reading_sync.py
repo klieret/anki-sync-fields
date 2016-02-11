@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sync import Sync
-from util import *
+from .util import get_kanjis, clean
 
 # import the main window object (mw) from ankiqt
 from aqt import mw
@@ -16,8 +16,9 @@ from aqt.qt import *
 
 class ReadingsSync(Sync):
     def __init__(self):
-        # todo: don't we init our super method?
         """Mostly configuration stuff."""
+        Sync.__init__(self)
+        # todo: don't we init our super method?
 
         # ------------------------------ Configuration ------------------------------
 
