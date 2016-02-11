@@ -6,7 +6,9 @@ from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.qt import *
 
-from util import *
+from .util import get_kanjis
+
+from .log import logger
 
 
 class Sync():
@@ -42,11 +44,14 @@ class Sync():
         pass
 
     def sync_all(self):
+        logger.debug("Sync all.")
         self.build_data()
         # get all note ids that should be updated
         nids = []
         for deck in self.targetDecks:
-            nids += mw.col.findCards("deck:%s" % deck)
+            nids_plus = mw.col.findCards("deck:%s" % deck)
+            nids += nids_plus
+            logger.debug("Considering %d cards from target deck %s." % (len(nids_plus), deck))
         # loop over them
         for nid in nids:
             card = mw.col.getCard(nid)
@@ -59,6 +64,7 @@ class Sync():
             print("Initializing self.data")
             self.build_data()
         kanjis = get_kanjis(note[self.sourceMatch])
+        logger.debug("Found kanjis %s" % ', '.join(kanjis))
         sub_dict = {}
         for kanji in kanjis:
             if kanji in self.data.keys():
