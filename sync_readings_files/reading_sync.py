@@ -9,6 +9,10 @@ from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.qt import *
 
+# todo: move to docstring
+# adds the story etc. of the readings to the field 'readings_story'
+# of the vocabulary notes.
+
 
 class ReadingsSync(Sync):
     def __init__(self):
@@ -33,7 +37,7 @@ class ReadingsSync(Sync):
         self.sourceMatch = 'Expression'
         self.targetMatch = 'Expression'
         # Take data from field sourceField and write it to targetField
-        self.sourceFields = ['story', 'kanji_examples']
+        self.sourceFields = ['onyomi_story', 'kunyomi_story', 'combined_story', 'kanji_examples']
         self.targetField = 'readings_story'
         self.menu_item_name = "Sync Reading stories"
 
@@ -50,19 +54,6 @@ class ReadingsSync(Sync):
             for sourceField in self.sourceFields:
                 self.data[kanji][sourceField] = note[sourceField]
 
-    def sync_single_target(self, note):
-        if self.data == {}:
-            # self.data has not been initialized
-            print("Initializing self.data")
-            self.build_data()
-        kanjis = get_kanjis(note[self.sourceMatch])
-        sub_dict = {}
-        for kanji in kanjis:
-            if kanji in self.data.keys():
-                sub_dict[kanji] = self.data[kanji]
-        note[self.targetField] = self.join_source_fields(sub_dict)
-        note.flush()  # don't forget!
-
     # -------------------------------------  -------------------------------------
 
     def join_source_fields(self, sub_dict):
@@ -70,11 +61,16 @@ class ReadingsSync(Sync):
         the string to be written in the field self.targetField."""
         out = unicode("")
         for key in sub_dict.keys():
+            on, kun, comb, ex = [sub_dict[key][self.sourceFields[i]].strip() for i in range(4)]
             out += '<span style="color:red">'+key+'</span>: '
-            if sub_dict[key][self.sourceFields[0]].strip():
-                out += sub_dict[key][self.sourceFields[0]].strip()
-            if sub_dict[key][self.sourceFields[1]].strip():
-                out += " Ex.: "+clean(sub_dict[key][self.sourceFields[1]], ['<br>', '\n'], '; ').strip()
+            if on:
+                out += "O: " + on
+            if kun:
+                out += "K: " + kun
+            if comb:
+                out += "C: " + comb
+            if ex:
+                out += " Ex.: " + clean(ex, ['<br>', '\n'], '; ').strip()
             out += "<br>"
         # split last <br>s
         if out[:-8] == "<br><br>":

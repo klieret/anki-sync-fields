@@ -9,10 +9,12 @@ from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.qt import *
 
+# Adds words which contain a certain kanji to the 'kanji_examples' field
+# of the readings deck
+
 
 class ExampleSync(Sync):
     def __init__(self):
-        # todo: this is probably not how you should do it....
         Sync.__init__(self)
         self.targetDecks = ["KANJI::readings"]
         self.sourceDecks = ["VOCAB::vocabular_main",
@@ -23,9 +25,9 @@ class ExampleSync(Sync):
                               "VOCAB::vocab_new": u"新",
                               "VOCAB::vocab_saikin": u"最",
                               "VOCAB::vocab_kanji1000": u"漢",
-                              "": "無"}
+                              "": u"無"}
         self.targetCards = ['readings']
-        self.sourceCards = ['myJapanese_example_sentences']
+        self.sourceCards = ['myJapanese_example_sentences', 'myJapanese_reverse']
         self.sourceMatch = 'Expression'
         self.targetMatch = 'Expression'
         self.sourceFields = ['Reading', 'Meaning']

@@ -6,6 +6,8 @@ from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.qt import *
 
+from util import *
+
 
 class Sync():
     def __init__(self):
@@ -52,7 +54,17 @@ class Sync():
             self.sync_single_target(note)
 
     def sync_single_target(self, note):
-        pass
+        if self.data == {}:
+            # self.data has not been initialized
+            print("Initializing self.data")
+            self.build_data()
+        kanjis = get_kanjis(note[self.sourceMatch])
+        sub_dict = {}
+        for kanji in kanjis:
+            if kanji in self.data.keys():
+                sub_dict[kanji] = self.data[kanji]
+        note[self.targetField] = self.join_source_fields(sub_dict)
+        note.flush()  # don't forget!
 
     def join_source_fields(self, sub_dict):
         return ""
