@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from sync import Sync
+# todo: *
 from util import *
 
 # import the main window object (mw) from ankiqt
 from aqt import mw
 # import the "show info" tool from utils.py
+# todo: *
 from aqt.qt import *
 
 # Adds words which contain a certain kanji to the 'kanji_examples' field
@@ -16,22 +18,22 @@ from aqt.qt import *
 class ExampleSync(Sync):
     def __init__(self):
         Sync.__init__(self)
-        self.targetDecks = ["KANJI::readings"]
-        self.sourceDecks = ["VOCAB::vocabular_main",
-                            "VOCAB::vocab_new",
-                            "VOCAB::vocab_kanji1000",
-                            "VOCAB::vocab_saikin"]
+        self.target_decks = ["KANJI::readings"]
+        self.source_decks = ["VOCAB::vocabular_main",
+                             "VOCAB::vocab_new",
+                             "VOCAB::vocab_kanji1000",
+                             "VOCAB::vocab_saikin"]
         self.deck_tag_dict = {"VOCAB::vocabular_main": u"本",
                               "VOCAB::vocab_new": u"新",
                               "VOCAB::vocab_saikin": u"最",
                               "VOCAB::vocab_kanji1000": u"漢",
                               "": u"無"}
-        self.targetCards = ['readings']
-        self.sourceCards = ['myJapanese_example_sentences', 'myJapanese_reverse']
-        self.sourceMatch = 'Expression'
-        self.targetMatch = 'Expression'
-        self.sourceFields = ['Reading', 'Meaning']
-        self.targetField = 'kanji_examples'
+        self.garget_cards = ['readings']
+        self.source_cards = ['myJapanese_example_sentences', 'myJapanese_reverse']
+        self.source_match = 'Expression'
+        self.target_match = 'Expression'
+        self.source_fields = ['Reading', 'Meaning']
+        self.target_field = 'kanji_examples'
         self.maxExamples = 5
         self.menu_item_name = "Sync Examples"
 
@@ -40,12 +42,12 @@ class ExampleSync(Sync):
         the string to be written in the field self.targetField."""
         out = unicode("")
         for key in sub_dict.keys():
-            for i in range(min(self.maxExamples, len(sub_dict[key][self.sourceFields[0]]))):
-                out += highlight_match(sub_dict[key][self.sourceFields[0]][i].strip(), key)
-                meaning = sub_dict[key][self.sourceFields[1]][i].strip()
+            for i in range(min(self.maxExamples, len(sub_dict[key][self.source_fields[0]]))):
+                out += highlight_match(sub_dict[key][self.source_fields[0]][i].strip(), key)
+                meaning = sub_dict[key][self.source_fields[1]][i].strip()
                 # clean = case insensitive replace of list members with some string
                 meaning = clean(meaning, ['\n', '<br>', '</div>', '</p>', ','], '; ')
-                meaning = clean(meaning, ['<div>'], '')
+                meaning = clean(meaning, ['<div>' ], '')
                 meaning = clean(meaning, ['&nbsp;'], ' ')
                 # only one meaning:
                 meaning = meaning.split(';')[0]
@@ -64,7 +66,7 @@ class ExampleSync(Sync):
         # where sourceFieldValue1, sourceFieldValue2 etc. belong to the same source note.
 
         # loop over all kanjis that are found in the sourceMatch field of the source note
-        for kanji in get_kanjis(note[self.sourceMatch]):
+        for kanji in get_kanjis(note[self.source_match]):
 
                 # if there is no entry for that kanji in the database, create a blank one
                 if kanji not in self.data:
@@ -72,19 +74,19 @@ class ExampleSync(Sync):
 
                 # now we look if there's an entry for the sourceFieldNames and if not
                 # we create one with the value we just found
-                for sourceField in self.sourceFields:
+                for sourceField in self.source_fields:
                     if sourceField not in self.data[kanji]:
                         self.data[kanji][sourceField] = [note[sourceField]]
 
                 # now at least one entry exists
                 # maybe we have to update instead of adding new stuff
-                if note[self.sourceFields[0]] in self.data[kanji][self.sourceFields[0]]:
+                if note[self.source_fields[0]] in self.data[kanji][self.source_fields[0]]:
                     # only update
-                    index = self.data[kanji][self.sourceFields[0]].index(note[self.sourceFields[0]])
-                    self.data[kanji][self.sourceFields[1]][index] = note[self.sourceFields[1]]
+                    index = self.data[kanji][self.source_fields[0]].index(note[self.source_fields[0]])
+                    self.data[kanji][self.source_fields[1]][index] = note[self.source_fields[1]]
                 else:
                     # append all
-                    for sourceField in self.sourceFields:
+                    for sourceField in self.source_fields:
                         self.data[kanji][sourceField].append(note[sourceField])
 
                 # doing the same thing with the deck value
