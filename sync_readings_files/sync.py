@@ -4,18 +4,17 @@
 # import the main window object (mw) from ankiqt
 from aqt import mw
 # import the "show info" tool from utils.py
-from aqt.qt import *
+from aqt.qt import QAction, SIGNAL
 
 from .util import get_kanjis
-
 from .log import logger
 
 
-class Sync():
+class Sync(object):
     def __init__(self):
         self.target_decks = []
         self.source_decks = []
-        self.garget_cards = []
+        self.target_cards = []
         self.source_cards = []
         self.source_match = ''
         self.target_match = ''
@@ -38,9 +37,9 @@ class Sync():
             for nid in nids:
                 card = mw.col.getCard(nid)
                 note = card.note()
-                self.datafy_single_note(note, deck)
+                self.add_note_to_db(note, deck)
 
-    def datafy_single_note(self, note, deck):
+    def add_note_to_db(self, note, deck):
         pass
 
     def sync_all(self):
@@ -69,10 +68,10 @@ class Sync():
         for kanji in kanjis:
             if kanji in self.data.keys():
                 sub_dict[kanji] = self.data[kanji]
-        note[self.target_field] = self.join_source_fields(sub_dict)
+        note[self.target_field] = self.target_field_content(sub_dict)
         note.flush()  # don't forget!
 
-    def join_source_fields(self, sub_dict):
+    def target_field_content(self, sub_dict):
         return ""
 
     def on_focus_lost(self, flag, note, field):
@@ -101,9 +100,9 @@ class Sync():
                             ok = True
             if not ok:
                 return flag
-            self.datafy_single_note(note, "")  # todo: deck!
+            self.add_note_to_db(note, "")  # todo: check that same deck?
             return True
-        elif model in self.garget_cards:
+        elif model in self.target_cards:
             src_fields = [self.target_match]
             ok = False
             for c, name in enumerate(mw.col.models.fieldNames(note.model())):

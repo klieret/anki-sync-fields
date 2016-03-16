@@ -4,11 +4,6 @@
 from sync import Sync
 from .util import get_kanjis, clean
 
-# import the main window object (mw) from ankiqt
-from aqt import mw
-# import the "show info" tool from utils.py
-from aqt.qt import *
-
 # todo: move to docstring
 # adds the story etc. of the readings to the field 'readings_story'
 # of the vocabulary notes.
@@ -46,17 +41,18 @@ class ReadingsSync(Sync):
         # For the first method, we will store all data here.
         self.data = {}
 
-    def datafy_single_note(self, note, deck):
+    def add_note_to_db(self, note, deck):
         # print("Datafy single")
         for kanji in get_kanjis(note[self.source_match]):
             self.data[kanji] = {}
-            self.data[kanji]["DECK"] = deck
+            self.data[kanji]["__DECK__"] = deck
             for sourceField in self.source_fields:
                 self.data[kanji][sourceField] = note[sourceField]
 
     # -------------------------------------  -------------------------------------
 
-    def join_source_fields(self, sub_dict):
+    # todo: rename
+    def target_field_content(self, sub_dict):
         """ Takes a subset of self.data and transforms it to
         the string to be written in the field self.targetField."""
         out = unicode("")

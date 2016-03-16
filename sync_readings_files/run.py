@@ -4,7 +4,6 @@
 from example_sync import ExampleSync
 from reading_sync import ReadingsSync
 
-from aqt.qt import *
 from anki.hooks import addHook
 
 
