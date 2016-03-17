@@ -13,8 +13,7 @@ class ExampleSync(Sync):
 
     """
     def __init__(self):
-        # Sync super class after we set all the properties!
-        # (allows checks to be run on below settings)
+        super(ExampleSync, self).__init__()
 
         self.source_decks = ["VOCAB::vocabular_main",
                              "VOCAB::vocab_new",
@@ -33,9 +32,6 @@ class ExampleSync(Sync):
         # import note: CONTENTS OF THIS FIELD WILL BE OVERWRITTEN
 
         self.menu_item_name = "Sync Examples"
-
-        # Sync super class after we set all the properties defined there!
-        Sync.__init__(self)
 
         # Other properties
         self.max_examples = 5

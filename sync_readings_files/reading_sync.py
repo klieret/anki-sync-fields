@@ -14,13 +14,14 @@ class ReadingsSync(Sync):
     """
     def __init__(self):
         """Mostly configuration stuff."""
+        super(ReadingsSync, self).__init__()
         # Sync super class after we set all the properties!
         # (allows checks to be run on below settings)
 
         self.source_decks = ["KANJI::readings"]
         self.source_cards = ['readings']
-        self.source_match = 'Expression'
-        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story', 'combined_story', 'kanji_examples']
+        self.source_kanji_field = 'Expression'
+        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story', 'combined_story']
         # note: also adapt the method format_target_field_content accordingly!
 
         self.target_decks = ["VOCAB::vocabular_main",
@@ -28,13 +29,12 @@ class ReadingsSync(Sync):
                              "VOCAB::vocab_kanji1000",
                              "VOCAB::vocab_saikin"]
         self.target_cards = ['myJapanese_example_sentences']
-        self.target_match = 'Expression'
-        self.target_field = 'readings_story'
+        self.target_kanji_field = 'Expression'
+        self.target_target_field = 'readings_story'
 
         self.menu_item_name = "Sync Reading stories"
 
-        # Sync super class after we set all the properties defined there!
-        Sync.__init__(self)
+
 
     def format_target_field_content(self, db_subset):
         """ Takes a subset of self.data and transforms it to
@@ -46,15 +46,14 @@ class ReadingsSync(Sync):
                 kun = db_entry['kunyomi_story']
                 comb = db_entry['combined_story']
                 ex = db_entry['kanji_examples']
-                out += '<span style="color:red">%s</span>' % kanji
+                print on, kun, comb
+                out += '<span style="color:red">%s</span>: ' % kanji
                 if on:
                     out += "O: %s" % on.strip()
                 if kun:
                     out += "K: %s" % kun.strip()
                 if comb:
                     out += "C: %s" % comb.strip()
-                if ex:
-                    out += " Ex.: " + ci_list_replace(ex, ['<br>', '\n'], '; ').strip()
                 out += "<br>"  # compensate for last <br> later
         # split last <br>s
         out = ci_list_replace_trailing(out, ["<br>", "<p>"], "")

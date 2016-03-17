@@ -59,7 +59,7 @@ class Db(defaultdict):
 
 class Sync(object):
     def __init__(self):
-        # those attributes are to be set in the subclasses:
+        # those attributes are to be overwritten in the subclasses.
         self.source_decks = []
         self.source_cards = []
         self.source_kanji_field = ''
@@ -73,6 +73,7 @@ class Sync(object):
         self._db = Db()
 
     def setup_menu(self, browser):
+        print(self.menu_item_name)
         a = QAction(self.menu_item_name, browser)
         browser.form.menuEdit.addAction(a)
         browser.connect(a, SIGNAL("triggered()"), self.update_all_target_cards)
@@ -80,7 +81,6 @@ class Sync(object):
     def add_all_notes_to_db(self):
         """ Build self.data """
         # loop through source_decks and build self.data
-        self._db = {}
         for deck in self.source_decks:
             nids = mw.col.findCards("deck:%s" % deck)
             for nid in nids:
