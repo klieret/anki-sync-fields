@@ -22,9 +22,9 @@ def ci_list_replace(string, replace_me, replace):
     :param replace: String with which to be replaced substrings will be replaced.
     :return:
     """
-    # build regular expression [<replace_me string 1><replace_me string 2>....], matching
-    # any of the characters (but only one at a time).
-    regex_string = '[%s]' % ''.join([re.escape(uw) for uw in replace_me])
+    # build regular expression (<replace_me string 1>|<replace_me string 2>|....), matching
+    # any of the replace_me strings (but only one at a time).
+    regex_string = '(%s)' % '|'.join([re.escape(uw) for uw in replace_me])
     regex = re.compile(regex_string, re.IGNORECASE)
     return regex.sub(replace, string)
 
@@ -46,6 +46,6 @@ def ci_list_replace_trailing(string, replace_me, replace):
     #       except there's still a '\n' following.
     # Build a regular expression hat matches any combination of the strings from replace_me at the
     # (real) end of the string:
-    regex_string = '[%s]*$(?!\n)' % ''.join([re.escape(uw) for uw in replace_me])
+    regex_string = '(%s)*$(?!\n)' % '|'.join([re.escape(uw) for uw in replace_me])
     regex = re.compile(regex_string, re.IGNORECASE)
     return regex.sub(replace, string)

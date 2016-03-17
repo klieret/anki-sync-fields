@@ -47,7 +47,7 @@ class ExampleSync(Sync):
                 word = self.format_word(db_entry['Reading'], kanji)
                 meaning = self.format_meaning(db_entry['Meaning'])
                 deck_tag = self.format_deck(db_entry["__DECK__"])
-                out += "%s%s%s<br>" % (word, meaning.strip(), deck_tag)
+                out += "%s%s%s<br>" % (word, meaning, deck_tag)
         # delete last <br>
         return out[:-4]
 
@@ -87,15 +87,24 @@ class ExampleSync(Sync):
         :type meaning: str
         """
         meaning = meaning.strip()
+        print meaning
         # 1. replace unwanted html members.
         # Also we want to split separate meanings later, so replace all characters probably
         # separating separate meanings by by ','
         meaning = ci_list_replace(meaning, ['\n', '<br>', '</div>', '</p>', ','], '; ')
+        print meaning
+
         meaning = ci_list_replace(meaning, ['<div>', '<p>'], '')
+        print meaning
+
         meaning = ci_list_replace(meaning, ['&nbsp;'], ' ')
+        print meaning
+
         meaning = ci_list_replace(meaning, [';', ','], ',')
         # 2. if there are multiple meanings, only take the first one:
         meaning = meaning.split(';')[0]
+        print meaning
+
         # 3. Split formatting characters
         if meaning.startswith('1. '):
             meaning = meaning[3:].strip()

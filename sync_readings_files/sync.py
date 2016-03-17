@@ -141,7 +141,6 @@ class Sync(object):
             # self.data has not been initialized
             self.loop_source_notes()
         kanjis = get_kanjis(note[self.source_kanji_field])
-        logger.debug("Found kanjis %s" % ', '.join(kanjis))
         sub_dict = {}
         for kanji in kanjis:
             if kanji in self._db.keys():
