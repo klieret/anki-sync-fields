@@ -87,6 +87,8 @@ class Sync(object):
         """Loops over all notes of the source deck and calls _add_not_to_db
         to add the relevant information to the database.
         """
+        # reset db
+        self._db = Db()
         # loop through source_decks and build self.data
         logger.debug("Initializing database.")
         for deck in self.source_decks:

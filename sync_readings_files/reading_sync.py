@@ -45,7 +45,6 @@ class ReadingsSync(Sync):
                 kun = db_entry['kunyomi_story']
                 comb = db_entry['combined_story']
                 ex = db_entry['kanji_examples']
-                print on, kun, comb
                 out += '<span style="color:red">%s</span>: ' % kanji
                 if on:
                     out += "O: %s" % on.strip()
