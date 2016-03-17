@@ -35,7 +35,6 @@ class ReadingsSync(Sync):
         self.menu_item_name = "Sync Reading stories"
 
 
-
     def format_target_field_content(self, db_subset):
         """ Takes a subset of self.data and transforms it to
         the string to be written in the field self.targetField."""

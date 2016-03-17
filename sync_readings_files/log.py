@@ -13,16 +13,29 @@ logger.setLevel(logging.DEBUG)
 sh_info = logging.StreamHandler(stream=sys.stdout)
 sh_info.setLevel(logging.WARNING)
 
-# will be caught by anki and displayed in a
-# pop-up window
+# will be caught by anki and displayed in a pop-up window
 sh_error = logging.StreamHandler(stream=sys.stderr)
 sh_error.setLevel(logging.ERROR)
 
 addon_dir = os.path.dirname(__file__)
 log_path = os.path.join(addon_dir, 'sync_readings.log')
+
+logger.addHandler(sh_error)
+logger.addHandler(sh_info)
+
+logger.debug("Saving log to file %s" % os.path.abspath(log_path))
 fh = logging.FileHandler(log_path, mode="w")
 fh.setLevel(logging.DEBUG)
 
 logger.addHandler(fh)
-logger.addHandler(sh_error)
-logger.addHandler(sh_info)
+
+
+def dump_database_for_debugging(db):
+    """ Puts the string representation of the database into a file
+    in the log directory.
+    :type db: Db
+    """
+    db_dump_path = os.path.join(addon_dir, 'db_dump.log')
+    logger.debug("Dumping database to file %s" % os.path.abspath(db_dump_path))
+    with open(db_dump_path, 'w') as db_dump_file:
+        db_dump_file.write(str(db))
