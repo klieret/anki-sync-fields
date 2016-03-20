@@ -19,14 +19,14 @@ class ExampleSync(Sync):
                              "VOCAB::vocab_new",
                              "VOCAB::vocab_kanji1000",
                              "VOCAB::vocab_saikin"]
-        self.source_cards = ['myJapanese_example_sentences',
-                             'myJapanese_reverse']
+        self.source_card_names = ['myJapanese_example_sentences',
+                                  'myJapanese_reverse']
         self.source_kanji_field = 'Expression'
         self.source_harvest_fields = ['Reading', 'Meaning']
         # note: also adapt the method format_target_field_content accordingly!
 
         self.target_decks = ["KANJI::readings"]
-        self.target_cards = ['readings']
+        self.target_card_names = ['readings']
         self.target_kanji_field = 'Expression'
         self.target_target_field = 'kanji_examples'
         # import note: CONTENTS OF THIS FIELD WILL BE OVERWRITTEN

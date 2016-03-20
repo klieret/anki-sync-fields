@@ -63,11 +63,11 @@ class Sync(object):
     def __init__(self):
         # those attributes are to be overwritten in the subclasses.
         self.source_decks = []
-        self.source_cards = []
+        self.source_card_names = []
         self.source_kanji_field = ''
         self.source_harvest_fields = ['']
         self.target_decks = []
-        self.target_cards = []
+        self.target_card_names = []
         self.target_kanji_field = ''
         self.target_target_field = ''
         self.menu_item_name = ""
@@ -152,14 +152,23 @@ class Sync(object):
         # should be overriden in subclass
         raise NotImplementedError
 
-    def on_focus_lost(self, flag, note, field):
+    def on_focus_lost(self, flag, note, edited_field_no):
         """ This method gets called after a field on a card was edited
         in Anki. We use that to automatically update the target field accordingly.
+        :param edited_field_no: The field number that has just lost focus.
+        :type edited_field_no: int
+        :param note: Anki note that is currently edited.
+        :type note: Anki note
         """
+        # fixme: somehow Audio field gets permanently reset, forcing Anki to almost freeze -.-
+        # todo: what exactly does the parameter flag do?
         # See http://ankisrs.net/docs/addons.html#hooks for more information about
         # hooks in Anki.
-        model = note.model()['name']
-        if model in self.source_cards:
+        # 1. Check that the card belongs to the target cards
+        card_name = note.model()['name']
+        logger.debug("Focus lost: flag: {}, note: {}, field: {}, card: {}".format(flag, note, edited_field_no,
+                                                                                  card_name))
+        if card_name in self.source_card_names:
             # Ignore it.
             # Some earlier versions tried to update our database
             # in this case. Note that in this case we would have to
@@ -168,18 +177,20 @@ class Sync(object):
             # However, since it's on_focus_lost there's no guarantee that
             # the card is even added, so this only leads to coding effort
             # with questionable effects.
-            return True
-        elif model in self.target_cards:
-            src_fields = [self.target_kanji_field]
-            ok = False
-            for c, name in enumerate(mw.col.models.fieldNames(note.model())):
-                for f in src_fields:
-                    if name == f:
-                        if field == c:
-                            ok = True
-            if not ok:
-                return flag
-            self.write_to_target_note(note)
-            return True
+            return flag
+        # todo: maybe check deck instead of card or both?
+        elif card_name in self.target_card_names:
+            # 2. Check that the field that has lost focus is the one we're interested in
+            relevant_fields = [self.target_kanji_field]
+            # because we both deal with field names and field numbers (we get edited_field_no
+            # as parameter, we have loop, enumerate and compare numbers
+            for field_no, field in enumerate(mw.col.models.fieldNames(note.model())):
+                for releant_field in relevant_fields:
+                    if field == releant_field and edited_field_no == field_no:
+                            logger.debug("Focus lost > Update!")
+                            self.write_to_target_note(note)
+                            return True
+            # we're not interested in this field
+            return flag
         else:
             return flag

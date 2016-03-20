@@ -10,8 +10,9 @@ import sys
 logger = logging.getLogger('sync_readings_logging')
 logger.setLevel(logging.DEBUG)
 
+# todo: set level higher once we have everything working
 sh_info = logging.StreamHandler(stream=sys.stdout)
-sh_info.setLevel(logging.WARNING)
+sh_info.setLevel(logging.DEBUG)
 
 # will be caught by anki and displayed in a pop-up window
 sh_error = logging.StreamHandler(stream=sys.stderr)
@@ -36,7 +37,7 @@ def dump_database_for_debugging(db):
     :type db: Db
     """
     return
-    # todo: maybe performs really bad; temporally deactivated
+    # todo: performs really bad of couse
     # db_dump_path = os.path.join(addon_dir, 'db_dump.log')
     # logger.debug("Dumping database to file %s" % os.path.abspath(db_dump_path))
     # with open(db_dump_path, 'w') as db_dump_file:
