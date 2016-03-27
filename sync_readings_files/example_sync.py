@@ -61,13 +61,14 @@ class ExampleSync(Sync):
                          "VOCAB::vocab_new": u"新",
                          "VOCAB::vocab_saikin": u"最",
                          "VOCAB::vocab_kanji1000": u"漢",
-                         "": u"無"}
+                         "": u"無",
+                         "VOCAB::vocab_back": u"英"}
         if deck in deck_tag_dict:
             deck_tag = unicode(deck_tag_dict[deck])
         else:
             deck_tag = deck
         if deck_tag:
-            return u" [%s]" % deck_tag
+            return u" [{}]".format(deck_tag)
         else:
             # maybe called with empty deck variable
             return deck_tag
