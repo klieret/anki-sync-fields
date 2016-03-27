@@ -18,7 +18,8 @@ class ExampleSync(Sync):
         self.source_decks = ["VOCAB::vocabular_main",
                              "VOCAB::vocab_new",
                              "VOCAB::vocab_kanji1000",
-                             "VOCAB::vocab_saikin"]
+                             "VOCAB::vocab_saikin",
+                             "VOCAB::vocab_back"]
         self.source_card_names = ['myJapanese_example_sentences',
                                   'myJapanese_reverse']
         self.source_kanji_field = 'Expression'
@@ -87,23 +88,18 @@ class ExampleSync(Sync):
         :type meaning: str
         """
         meaning = meaning.strip()
-        print meaning
         # 1. replace unwanted html members.
         # Also we want to split separate meanings later, so replace all characters probably
         # separating separate meanings by by ','
         meaning = ci_list_replace(meaning, ['\n', '<br>', '</div>', '</p>', ','], '; ')
-        print meaning
 
         meaning = ci_list_replace(meaning, ['<div>', '<p>'], '')
-        print meaning
 
         meaning = ci_list_replace(meaning, ['&nbsp;'], ' ')
-        print meaning
 
         meaning = ci_list_replace(meaning, [';', ','], ',')
         # 2. if there are multiple meanings, only take the first one:
         meaning = meaning.split(';')[0]
-        print meaning
 
         # 3. Split formatting characters
         if meaning.startswith('1. '):

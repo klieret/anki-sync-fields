@@ -160,12 +160,12 @@ class Sync(object):
         :param note: Anki note that is currently edited.
         :type note: Anki note
         """
-        # fixme: somehow Audio field gets permanently reset, forcing Anki to almost freeze -.-
-        # todo: what exactly does the parameter flag do?
-        # See http://ankisrs.net/docs/addons.html#hooks for more information about
-        # hooks in Anki.
+        # Note: Not easy to check for the deck, so we only check the type of the
+        #       card. Thus everything here applies to all cards of type in self.target_card
+        #       regardless of the deck.
         # 1. Check that the card belongs to the target cards
         card_name = note.model()['name']
+        # print "focus lost"
         logger.debug("Focus lost: flag: {}, note: {}, field: {}, card: {}".format(flag, note, edited_field_no,
                                                                                   card_name))
         if card_name in self.source_card_names:
@@ -178,7 +178,6 @@ class Sync(object):
             # the card is even added, so this only leads to coding effort
             # with questionable effects.
             return flag
-        # todo: maybe check deck instead of card or both?
         elif card_name in self.target_card_names:
             # 2. Check that the field that has lost focus is the one we're interested in
             relevant_fields = [self.target_kanji_field]

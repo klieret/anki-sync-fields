@@ -17,14 +17,16 @@ class ReadingsSync(Sync):
         self.source_decks = ["KANJI::readings"]
         self.source_card_names = ['readings']
         self.source_kanji_field = 'Expression'
-        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story', 'combined_story']
+        self.source_harvest_fields = ['onyomi_dstory', 'kunyomi_story', 'combined_story']
         # note: also adapt the method format_target_field_content accordingly!
 
         self.target_decks = ["VOCAB::vocabular_main",
                              "VOCAB::vocab_new",
                              "VOCAB::vocab_kanji1000",
-                             "VOCAB::vocab_saikin"]
-        self.target_card_names = ['myJapanese_example_sentences']
+                             "VOCAB::vocab_saikin",
+                             "VOCAB::vocab_back"]
+        self.target_card_names = ['myJapanese_example_sentences',
+		                          'myJapanese_example_sentences_reverse_only']
         self.target_kanji_field = 'Expression'
         self.target_target_field = 'readings_story'
 
@@ -32,7 +34,9 @@ class ReadingsSync(Sync):
 
     def format_target_field_content(self, db_subset):
         """ Takes a subset of self.data and transforms it to
-        the string to be written in the field self.targetField."""
+        the string to be written in the field self.targetField.
+        @type db_subset: Db
+        """
         out = unicode("")
         for kanji in db_subset.keys():
             for db_entry in db_subset[kanji]:
