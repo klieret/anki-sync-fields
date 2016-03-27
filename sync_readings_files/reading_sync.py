@@ -17,7 +17,7 @@ class ReadingsSync(Sync):
         self.source_decks = ["KANJI::readings"]
         self.source_card_names = ['readings']
         self.source_kanji_field = 'Expression'
-        self.source_harvest_fields = ['onyomi_dstory', 'kunyomi_story', 'combined_story']
+        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story', 'combined_story']
         # note: also adapt the method format_target_field_content accordingly!
 
         self.target_decks = ["VOCAB::vocabular_main",
