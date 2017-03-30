@@ -18,7 +18,8 @@ class ReadingsSync(Sync):
         self.source_decks = ["KANJI::readings"]
         self.source_card_names = ['readings']
         self.source_kanji_field = 'Expression'
-        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story', 'combined_story']
+        self.source_harvest_fields = ['onyomi_story', 'kunyomi_story',
+                                      'combined_story']
         # note: also adapt the method format_target_field_content accordingly!
 
         self.target_decks = ["VOCAB::vocabular_main",
@@ -59,7 +60,8 @@ class ReadingsSync(Sync):
                 on = stripHTML(db_entry['onyomi_story']).strip()
                 kun = stripHTML(db_entry['kunyomi_story']).strip()
                 comb = stripHTML(db_entry['combined_story']).strip()
-                out += u'<span style="{}">{}</span> '.format(badge_style, kanji)
+                out += u'<span style="{}">{}</span> '.format(badge_style,
+                                                             kanji)
                 if on:
                     out += u"音: {}".format(on)
                 if kun:

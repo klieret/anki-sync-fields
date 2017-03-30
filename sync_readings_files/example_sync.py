@@ -7,13 +7,15 @@ from .util import ci_list_replace
 # Adds words which contain a certain kanji to the 'kanji_examples' field
 # of the readings deck
 
-
 class ExampleSync(Sync):
     """
-
+    Subclass of Sync class. Defines attributes of Sync and implements
+    Sync.format_target_field_content.
     """
     def __init__(self):
         super(ExampleSync, self).__init__()
+
+        # Properties of Sync:
 
         self.source_decks = ["VOCAB::vocabular_main",
                              "VOCAB::vocab_new",
@@ -30,7 +32,7 @@ class ExampleSync(Sync):
         self.target_card_names = ['readings']
         self.target_kanji_field = 'Expression'
         self.target_target_field = 'kanji_examples'
-        # import note: CONTENTS OF THIS FIELD WILL BE OVERWRITTEN
+        # import note: CONTENTS OF TARGET_TARGET_FIELD WILL BE OVERWRITTEN
 
         self.menu_item_name = "Sync Examples"
 
@@ -51,6 +53,10 @@ class ExampleSync(Sync):
                 out += "%s%s%s<br>" % (word, meaning, deck_tag)
         # delete last <br>
         return out[:-4]
+
+    # ------------------------------------------------------------------------
+    # Helper methods for format_target_field_content:
+    # ------------------------------------------------------------------------
 
     @staticmethod
     def format_deck(deck):
@@ -89,23 +95,28 @@ class ExampleSync(Sync):
         :type meaning: str
         """
         meaning = meaning.strip()
+
         # 1. replace unwanted html members.
-        # Also we want to split separate meanings later, so replace all characters probably
-        # separating separate meanings by by ','
-        meaning = ci_list_replace(meaning, ['\n', '<br>', '</div>', '</p>', ','], '; ')
+        # Also we want to split separate meanings later, so replace all
+        # characters probably separating separate meanings by by ','
 
+        meaning = ci_list_replace(meaning, ['\n', '<br>', '</div>', '</p>',
+                                            ','], '; ')
         meaning = ci_list_replace(meaning, ['<div>', '<p>'], '')
-
         meaning = ci_list_replace(meaning, ['&nbsp;'], ' ')
-
         meaning = ci_list_replace(meaning, [';', ','], ',')
+
         # 2. if there are multiple meanings, only take the first one:
+
         meaning = meaning.split(';')[0]
 
         # 3. Split formatting characters
+
         if meaning.startswith('1. '):
             meaning = meaning[3:].strip()
+
         # 4. Bring in final format.
+
         if meaning:
             return " (%s) " % meaning
         else:

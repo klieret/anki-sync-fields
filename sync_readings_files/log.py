@@ -37,7 +37,7 @@ def dump_database_for_debugging(db):
     :type db: Db
     """
     return
-    # todo: performs really bad of couse
+    # fixme: performs really bad of couse
     # db_dump_path = os.path.join(addon_dir, 'db_dump.log')
     # logger.debug("Dumping database to file %s" % os.path.abspath(db_dump_path))
     # with open(db_dump_path, 'w') as db_dump_file:
