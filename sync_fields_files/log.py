@@ -7,6 +7,12 @@ import logging
 import os.path
 import sys
 
+dump_database_after_full_loop = False
+# If this is set to true, the database will be written to the log file as a
+# huge string after Sync.loop_source_notes is called (i.e. after a full loop
+# over all source notes was performed)
+# This may not perform that well.
+
 logger = logging.getLogger('sync_readings_logging')
 logger.setLevel(logging.DEBUG)
 
@@ -31,14 +37,13 @@ fh.setLevel(logging.DEBUG)
 logger.addHandler(fh)
 
 
-def dump_database_for_debugging(db):
+def dump_database(db):
     """ Puts the string representation of the database into a file
     in the log directory.
     :type db: Db
     """
-    return
     # fixme: performs really bad of couse
-    # db_dump_path = os.path.join(addon_dir, 'db_dump.log')
-    # logger.debug("Dumping database to file %s" % os.path.abspath(db_dump_path))
-    # with open(db_dump_path, 'w') as db_dump_file:
-    #     db_dump_file.write(str(db))
+    db_dump_path = os.path.join(addon_dir, 'db_dump.log')
+    logger.debug("Dumping database to file %s" % os.path.abspath(db_dump_path))
+    with open(db_dump_path, 'w') as db_dump_file:
+        db_dump_file.write(str(db))

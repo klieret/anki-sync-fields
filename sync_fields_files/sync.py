@@ -8,7 +8,7 @@ from aqt import mw
 from aqt.qt import QAction, SIGNAL
 
 from .util import get_kanjis
-from .log import logger, dump_database_for_debugging
+from .log import logger, dump_database, dump_database_after_full_loop
 
 # todo: docstrings
 
@@ -113,7 +113,8 @@ class Sync(object):
                 card = mw.col.getCard(nid)
                 note = card.note()
                 self._add_note_to_db(note, deck)
-        dump_database_for_debugging(self._db)
+        if dump_database_after_full_loop:
+            dump_database(self._db)
 
     def _add_note_to_db(self, note, deck=""):
         """ Adds information from a single note to the database.
