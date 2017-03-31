@@ -13,7 +13,7 @@ dump_database_after_full_loop = False
 # over all source notes was performed)
 # This may not perform that well.
 
-logger = logging.getLogger('sync_readings_logging')
+logger = logging.getLogger('sync_fields_logging')
 logger.setLevel(logging.DEBUG)
 
 # todo: set level higher once we have everything working
@@ -25,7 +25,7 @@ sh_error = logging.StreamHandler(stream=sys.stderr)
 sh_error.setLevel(logging.ERROR)
 
 addon_dir = os.path.dirname(__file__)
-log_path = os.path.join(addon_dir, 'sync_readings.log')
+log_path = os.path.join(addon_dir, 'sync_fields.log')
 
 logger.addHandler(sh_error)
 logger.addHandler(sh_info)

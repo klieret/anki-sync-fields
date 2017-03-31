@@ -51,6 +51,6 @@ Almost all of the interesting code is already implemented in the ```Sync``` clas
 
 ## Debugging
 
-This plugin will always save a log ```sync_readings.log```, which should be located in this plugin's directory (```sync_fields_files```). 
+This plugin will always save a log ```sync_fields.log```, which should be located in this plugin's directory (```sync_fields_files```). 
 
 There is also a switch ```dump_database_after_full_loop = False``` in ```log.py```. If set to ```True```, the full database will be dumped as a string to the log file after ```Sync.loop_source_notes``` was called (i.e. after a full loop over all source notes was performed). This may however not perform well (which is why it is disabled by default).

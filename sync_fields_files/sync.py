@@ -106,6 +106,7 @@ class Sync(object):
         # loop through source_decks and build self.data
         logger.debug("Initializing database.")
         for deck in self.source_decks:
+            # todo: better use findNotes?
             nids = mw.col.findCards("deck:%s" % deck)
             logger.debug("Found %d cards from source deck %s." %
                          (len(nids), deck))
