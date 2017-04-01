@@ -33,7 +33,7 @@ log_path = os.path.join(addon_dir, 'sync_fields.log')
 logger.addHandler(sh_error)
 logger.addHandler(sh_info)
 
-logger.debug("Saving log to file %s" % os.path.abspath(log_path))
+logger.info("Saving log to file %s" % os.path.abspath(log_path))
 fh = logging.FileHandler(log_path, mode="w")
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
