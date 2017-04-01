@@ -54,3 +54,7 @@ Almost all of the interesting code is already implemented in the ```Sync``` clas
 This plugin will always save a log ```sync_fields.log```, which should be located in this plugin's directory (```sync_fields_files```). 
 
 There is also a switch ```dump_database_after_full_loop = False``` in ```log.py```. If set to ```True```, the full database will be dumped as a string to the log file after ```Sync.loop_source_notes``` was called (i.e. after a full loop over all source notes was performed). This may however not perform well (which is why it is disabled by default).
+
+## License
+
+The contents of this repository are licensed under the [*AGPL3* license](https://choosealicense.com/licenses/agpl-3.0/) (to be compatible with the license of Anki and its addons as detailed [here](https://ankiweb.net/account/terms)).
