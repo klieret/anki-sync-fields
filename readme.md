@@ -1,5 +1,7 @@
 # Syncing fields between Anki notes.
 
+**[Overview over my other Anki add-ons](http://www.lieret.net/opensource/#anki)**
+
 Plugin for [Anki](https://apps.ankiweb.net/), a spaced repetition flashcard program. Some basics: [Anki manual](https://apps.ankiweb.net/docs/manual.html#the-basics).
 
 **This Addon requires substantial configuration/adaptation to work for you. Rudimentary knowledge of python will be helpful. Note that the *target fields* of the *target notes* will be overwritten, so please be careful!**
